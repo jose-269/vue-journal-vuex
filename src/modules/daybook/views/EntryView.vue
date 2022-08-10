@@ -1,39 +1,91 @@
 <template>
-  <div class="entry-title d-flex justify-content-between p-2">
-    <div>
-        <span class="text-success fs-3 fw-bold">15</span>
-        <span class="mx-1 fs-3">30</span>
-        <span class="mx-2 fs-4 fw-light">2021, sabado</span>
+  <template v-if="entry">
+
+    <div  class="entry-title d-flex justify-content-between p-2">
+      <div>
+          <span class="text-success fs-3 fw-bold">{{ day }}</span>
+          <span class="mx-1 fs-3">{{ month }}</span>
+          <span class="mx-2 fs-4 fw-light">{{yearDay}}</span>
+      </div>
+  
+      <div>
+          <button class="btn btn-danger mx-2">
+              Borrar
+              <i class="fa fa-trash-alt"></i>
+          </button>
+  
+          <button class="btn btn-primary">
+              Subir foto
+              <i class="fa fa-upload"></i>
+          </button>
+      </div>
     </div>
-
-    <div>
-        <button class="btn btn-danger mx-2">
-            Borrar
-            <i class="fa fa-trash-alt"></i>
-        </button>
-
-        <button class="btn btn-primary">
-            Subir foto
-            <i class="fa fa-upload"></i>
-        </button>
-    </div>
-  </div>
-
-  <hr>
+  
+    <hr>
   <div class="d-flex flex-column px-3 h-75">
-    <textarea placeholder="¿Qué sucedi{o hoy?"></textarea>
+    <textarea placeholder="¿Qué sucedi{o hoy?" v-model="entry.text"></textarea>
   </div>
-	<Fab :icon="'fa-save'" />
-	<img src="https://cdn.fanaticguitars.com/tokai/210000004871/tokai-ls136f-lp-flame-brown-sunburst-1942515-4.jpg" alt="entry-picture" class="img-thumbnail"
+    	<img src="https://cdn.fanaticguitars.com/tokai/210000004871/tokai-ls136f-lp-flame-brown-sunburst-1942515-4.jpg" alt="entry-picture" class="img-thumbnail"
 	 >
+  </template>
+	<Fab :icon="'fa-save'" @on:Click="saveEntry" />
+
 </template>
 
 <script>
+import { mapGetters } from "vuex";
 import { defineAsyncComponent } from "vue";
-export default {
+import getDayMonthYear from "../helpers/getDayMonthYear";
+    export default {
+  data() {
+    return {
+      entry: null
+    }
+  },
 	components: {
 		Fab: defineAsyncComponent(() => import('../components/Fab.vue')),
 	},
+  computed: {
+    ...mapGetters('journal',['getEntriesById']),
+    day() {
+      const { day } = getDayMonthYear(this.entry.date);
+      return day;
+    },
+    month() {
+      const { month } = getDayMonthYear(this.entry.date);
+      return month;
+    },
+    yearDay() {
+      const { yearDay } = getDayMonthYear(this.entry.date);
+      return yearDay;
+    }
+  },
+  methods: {
+    loadEntry() {
+      const entry = this.getEntriesById(this.id);
+      if(!entry) return this.$router.push({ name: 'no-entry'});
+      this.entry = entry;
+    },
+    async saveEntry() {
+      console.log('Guardando Entrada')
+    }
+  },
+  props: {
+    id: {
+      type: String,
+      required: true, 
+    },
+  },
+  created () {
+  this.loadEntry();
+  this.saveEntry()
+  },
+
+  watch: {
+    id() {
+      this.loadEntry();
+    }
+  }
 }
 </script>
 

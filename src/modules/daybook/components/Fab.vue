@@ -1,10 +1,12 @@
 <template>
-  <button class="btn btn-primary">
+  <button class="btn btn-primary"
+  @click="saveEntry">
     <i class="fa fa-2x" :class="icon"></i>
   </button>
 </template>
 
 <script>
+
 export default {
   props: {
     icon: {
@@ -12,6 +14,9 @@ export default {
       default: "fa-plus"
     },
   },
+  // created () {
+  //   this.saveEntry();
+  // },
 }
 </script>
 

@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions,mapState } from "vuex";
 import { defineAsyncComponent } from "vue";
 import getDayMonthYear from "../helpers/getDayMonthYear";
     export default {
@@ -46,6 +46,7 @@ import getDayMonthYear from "../helpers/getDayMonthYear";
 		Fab: defineAsyncComponent(() => import('../components/Fab.vue')),
 	},
   computed: {
+    ...mapState('journal',['entries']),
     ...mapGetters('journal',['getEntriesById']),
     day() {
       const { day } = getDayMonthYear(this.entry.date);
@@ -61,13 +62,37 @@ import getDayMonthYear from "../helpers/getDayMonthYear";
     }
   },
   methods: {
+    ...mapActions('journal', ['updateEntry', 'createEntries']),
     loadEntry() {
-      const entry = this.getEntriesById(this.id);
-      if(!entry) return this.$router.push({ name: 'no-entry'});
-      this.entry = entry;
+
+      let entry;
+      if(this.id === "new") {
+        entry = {
+          text: "",
+          date: new Date().getTime(),
+        }
+      }else {
+       entry = this.getEntriesById(this.id);
+        if(!entry) return this.$router.push({ name: 'no-entry'});
+      }
+        this.entry = entry;
     },
     async saveEntry() {
-      console.log('Guardando Entrada')
+      // console.log('Guardando Entrada');
+      if(this.entry.id) {
+        await this.updateEntry(this.entry);
+      }else {
+        // Crear una nueva entrada
+        console.log("Post de una nueva entrada");
+        // await action 
+        await this.createEntries(this.entry);
+        await this.$router.push({ name: 'entry', params: {id: this.entries[0].id} });
+
+
+        // redirectTo => entry, params
+      }
+      // Disparar Accion del Journal Store
+      // console.log(this.entry.text);
     }
   },
   props: {
@@ -78,7 +103,7 @@ import getDayMonthYear from "../helpers/getDayMonthYear";
   },
   created () {
   this.loadEntry();
-  this.saveEntry()
+  // this.saveEntry();
   },
 
   watch: {
